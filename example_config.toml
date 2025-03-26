@@ -1,0 +1,15 @@
+default = "ollama"
+addr = "0.0.0.0:4546"
+
+[runners.ollama]
+url = "http://127.0.0.1:11434"
+start_script = "sudo systemctl start ollama"
+stop_script = "sudo systemctl stop ollama"
+check_script = "systemctl is-active ollama"
+
+[runners.dummy]
+url = "http://127.0.0.1:8000"
+start_script = "echo test"
+stop_script = "echo test"
+check_script = "false"
+provides = ["qwen-2.5-vl"]
