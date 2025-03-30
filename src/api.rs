@@ -44,6 +44,16 @@ pub async fn switch_program(ctx: State<Arc<Ctx>>, new: Json<ActiveRunner>) -> Sw
         return SwitchResponse::RunnerNotFound;
     };
 
+    match (&new_runner.provides, &new.model) {
+        (Some(models), Some(new_model)) => {
+            if !models.contains(new_model) {
+                return SwitchResponse::InvalidModel;
+            }
+        }
+        (Some(_), None) | (None, Some(_)) => return SwitchResponse::InvalidModel,
+        (None, None) => (),
+    };
+
     let mut active = ctx.currently_running.write().await;
 
     let current_runner = ctx

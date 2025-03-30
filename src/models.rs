@@ -28,6 +28,8 @@ pub enum SwitchResponse {
     RunnerNotFound,
     #[response(status = INTERNAL_SERVER_ERROR)]
     SwitchingFailed { msg: String },
+    #[response(status = BAD_REQUEST)]
+    InvalidModel,
 }
 
 impl IntoResponse for SwitchResponse {
@@ -37,6 +39,7 @@ impl IntoResponse for SwitchResponse {
             SwitchResponse::Ok(_) => StatusCode::OK,
             SwitchResponse::RunnerNotFound => StatusCode::NOT_FOUND,
             SwitchResponse::SwitchingFailed { .. } => StatusCode::INTERNAL_SERVER_ERROR,
+            SwitchResponse::InvalidModel => StatusCode::BAD_REQUEST,
         };
 
         (status, Json(self)).into_response()
