@@ -1,39 +1,49 @@
 use std::collections::HashMap;
 
+use axum::{Json, response::IntoResponse};
+use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
+use utoipa::{IntoResponses, ToSchema};
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Runner {
     pub provides: Option<Vec<String>>,
     pub url: url::Url,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct RunnerResponse {
     pub runners: HashMap<String, Runner>,
     pub active: ActiveRunner,
 }
 
-#[derive(Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", tag = "status")]
-pub enum ActionResponse<T> {
-    Ok(T),
-    Err { message: String },
+#[derive(Deserialize, Serialize, ToSchema, IntoResponses)]
+#[serde(rename_all = "camelCase")]
+pub enum SwitchResponse {
+    #[response(status = OK)]
+    Ok(ActiveRunner),
+    #[response(status = NOT_FOUND)]
+    RunnerNotFound,
+    #[response(status = INTERNAL_SERVER_ERROR)]
+    SwitchingFailed { msg: String },
 }
 
-impl<T> ActionResponse<T> {
-    pub fn err(message: String) -> ActionResponse<T> {
-        Self::Err { message }
-    }
+impl IntoResponse for SwitchResponse {
+    fn into_response(self) -> axum::response::Response {
+        // would be nice to get this from #[response]
+        let status = match self {
+            SwitchResponse::Ok(_) => StatusCode::OK,
+            SwitchResponse::RunnerNotFound => StatusCode::NOT_FOUND,
+            SwitchResponse::SwitchingFailed { .. } => StatusCode::INTERNAL_SERVER_ERROR,
+        };
 
-    pub fn ok(data: T) -> ActionResponse<T> {
-        ActionResponse::Ok(data)
+        (status, Json(self)).into_response()
     }
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Deserialize, Serialize, ToSchema, Clone)]
 pub struct ActiveRunner {
     pub name: String,
     pub model: Option<String>,

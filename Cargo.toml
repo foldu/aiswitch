@@ -20,6 +20,9 @@ reqwest = { version = "0.12.15", default-features = false, features = [
 ] }
 tokio-stream = { version = "0.1.17", features = ["sync"] }
 futures = { version = "0.3.31", default-features = false, features = ["std"] }
+utoipa = { version = "5.3.1", features = ["url"] }
+utoipa-axum = "0.2.0"
+utoipa-redoc = { version = "6.0.0", features = ["axum"] }
 
 [dev-dependencies]
 tempfile = "3.19.1"

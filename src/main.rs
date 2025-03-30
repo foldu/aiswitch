@@ -9,12 +9,15 @@ use std::{
     sync::Arc,
 };
 
-use axum::{Router, response::Html, routing::get};
+use axum::{response::Html, routing::get};
 use clap::Parser;
 use eyre::Context as _;
 use serve_config::Config;
 use tokio::{signal, sync::broadcast};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use utoipa::OpenApi;
+use utoipa_axum::router::OpenApiRouter;
+use utoipa_redoc::Servable;
 
 use crate::models::ActiveRunner;
 
@@ -25,6 +28,10 @@ enum Opt {
         config_path: PathBuf,
     },
 }
+
+#[derive(utoipa::OpenApi)]
+#[openapi(tags())]
+struct ApiDoc;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), eyre::Error> {
@@ -101,14 +108,29 @@ async fn serve(config_path: &Path) -> Result<(), eyre::Error> {
 
     let addr = ctx.config.addr;
 
-    let app = Router::new()
+    let (app, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
+        .routes(utoipa_axum::routes!(api::get_programs, api::switch_program))
+        .routes(utoipa_axum::routes!(api::stream_updates))
         .route("/", get(main_page))
+        .with_state(Arc::new(ctx))
+        .split_for_parts();
+
+    let api_json = api
+        .to_json()
+        .context("Failed converting api definition to json")?;
+
+    let doc = utoipa_redoc::Redoc::with_url("/doc", api);
+    let app = app
         .route(
-            "/api/runner",
-            get(api::get_programs).put(api::switch_program),
+            "/spec",
+            get(move || async move {
+                (
+                    [(axum::http::header::CONTENT_TYPE, "application/json")],
+                    api_json,
+                )
+            }),
         )
-        .route("/api/update", get(api::stream_updates))
-        .with_state(Arc::new(ctx));
+        .merge(doc);
 
     let listener = tokio::net::TcpListener::bind(addr)
         .await
