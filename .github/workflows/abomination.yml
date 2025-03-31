@@ -21,4 +21,4 @@ jobs:
             - run: zip -r frontend.zip dist/
             - uses: softprops/action-gh-release@v2
               with:
-                  files: frontend.zip
+                  files: frontend/frontend.zip
