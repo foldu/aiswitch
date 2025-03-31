@@ -14,7 +14,7 @@ jobs:
 
             - run: bun install
             - run: bun run build
-            - run: zip -r frontend.zip frontend/dist/
+            - run: zip -r frontend.zip dist/
             - uses: softprops/action-gh-release@v2
               with:
                   files: frontend.zip
