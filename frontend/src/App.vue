@@ -63,30 +63,39 @@ onMounted(async () => {
 
 <template>
     <header>
-        <ul>
-            <li><a :href="`${baseUrl}/doc`">API Documentation</a></li>
+        <ul class="header-nav">
+            <li class="header-nav-item">
+                <a :href="`${baseUrl}/doc`" class="header-nav-link">API Documentation</a>
+            </li>
+            <li class="header-nav-item">
+                <a href="https://github.com/foldu/aiswitch" class="header-nav-link">Repository</a>
+            </li>
         </ul>
     </header>
-    <main>
+    <main class="main-content">
         <div v-if="!active">
-            <p>Loading runners</p>
+            <p class="loading-message">Loading runners</p>
         </div>
         <div v-else>
-            <p>Currently running {{ active.name }}</p>
-            <p v-if="active.model">With model {{ active.model }}</p>
-            <form @submit.prevent="changeRunner">
-                <label for="runner">Runner</label>
-                <select id="runner" v-model="selectedRunnerKey">
+            <p class="runner-info">Currently running {{ active.name }}</p>
+            <p v-if="active.model" class="model-info">With model {{ active.model }}</p>
+            <form class="runner-form" @submit.prevent="changeRunner">
+                <label class="form-label" for="runner">Runner</label>
+                <select id="runner" v-model="selectedRunnerKey" class="form-select">
                     <option v-for="(_, name) in runners" :key="name" :value="name">
                         {{ name }}
                     </option>
                 </select>
-                <label v-if="selectedRunnerKey && runners[selectedRunnerKey].provides" for="model"
+                <label
+                    v-if="selectedRunnerKey && runners[selectedRunnerKey].provides"
+                    class="form-label"
+                    for="model"
                     >Model</label
                 >
                 <select
                     v-if="selectedRunnerKey && runners[selectedRunnerKey].provides"
                     v-model="selectedModelKey"
+                    class="form-select"
                 >
                     <option
                         v-for="model in runners[selectedRunnerKey].provides"
@@ -96,10 +105,85 @@ onMounted(async () => {
                         {{ model }}
                     </option>
                 </select>
-                <button type="submit">Change runner</button>
+                <button type="submit" class="submit-button">Change runner</button>
             </form>
         </div>
     </main>
 </template>
+<style scoped>
+header {
+    background-color: #f0f0f0;
+    padding: 1rem;
+    text-align: center;
+}
 
-<style scoped></style>
+main {
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.header-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.header-nav-item {
+    margin: 0 1rem;
+}
+
+.header-nav-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+.loading-message {
+    font-style: italic;
+    color: #777;
+}
+
+.runner-info {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.model-info {
+    color: #555;
+}
+
+.runner-form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+}
+
+.form-label {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.form-select {
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.submit-button {
+    background-color: #4caf50;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.submit-button:hover {
+    background-color: #3e8e41;
+}
+</style>
