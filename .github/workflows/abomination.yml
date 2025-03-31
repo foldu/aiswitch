@@ -6,6 +6,8 @@ on:
 jobs:
     build-frontend:
         runs-on: ubuntu-latest
+        permissions:
+            contents: write
         defaults:
             run:
                 working-directory: frontend
