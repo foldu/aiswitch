@@ -1,6 +1,8 @@
 name: "Embarrassing"
 on:
-    workflow_dispatch:
+    push:
+        tags:
+            - "*"
 jobs:
     build-frontend:
         runs-on: ubuntu-latest
