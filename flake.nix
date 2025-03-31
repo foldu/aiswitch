@@ -47,6 +47,7 @@
               (craneLib.fileset.commonCargoSources unfilteredRoot)
               # Also keep any html files
               (lib.fileset.fileFilter (file: file.hasExt "html") unfilteredRoot)
+              (lib.fileset.maybeMissing ./frontend/dist)
             ];
           };
 
