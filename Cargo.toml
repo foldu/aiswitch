@@ -23,6 +23,8 @@ futures = { version = "0.3.31", default-features = false, features = ["std"] }
 utoipa = { version = "5.3.1", features = ["url"] }
 utoipa-axum = "0.2.0"
 utoipa-redoc = { version = "6.0.0", features = ["axum"] }
+rust-embed = "8.6.0"
+mime_guess = "2.0.5"
 
 [dev-dependencies]
 tempfile = "3.19.1"

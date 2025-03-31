@@ -2,6 +2,7 @@ mod api;
 mod models;
 mod runner;
 mod serve_config;
+mod spa;
 
 use std::{
     net::SocketAddr,
@@ -9,7 +10,7 @@ use std::{
     sync::Arc,
 };
 
-use axum::{response::Html, routing::get};
+use axum::routing::get;
 use clap::Parser;
 use eyre::Context as _;
 use serve_config::Config;
@@ -111,7 +112,7 @@ async fn serve(config_path: &Path) -> Result<(), eyre::Error> {
     let (app, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .routes(utoipa_axum::routes!(api::get_programs, api::switch_program))
         .routes(utoipa_axum::routes!(api::stream_updates))
-        .route("/", get(main_page))
+        .fallback(spa::static_handler)
         .with_state(Arc::new(ctx))
         .split_for_parts();
 
@@ -146,15 +147,15 @@ async fn serve(config_path: &Path) -> Result<(), eyre::Error> {
     Ok(())
 }
 
-async fn main_page() -> Html<&'static str> {
-    Html(include_str!("../main.html"))
-}
-
 pub struct Ctx {
     pub currently_running: tokio::sync::RwLock<ActiveRunner>,
     pub updates: broadcast::Sender<models::ActiveRunner>,
     pub config: Config,
 }
+
+#[derive(rust_embed::Embed)]
+#[folder = "frontend/dist/"]
+struct Assets;
 
 async fn shutdown_signal() {
     let ctrl_c = async {
