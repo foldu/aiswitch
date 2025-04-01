@@ -30,6 +30,12 @@
           overlays = [ (import rust-overlay) ];
         };
 
+        # FIXME: build this with nix too, currently bun lockfiles aren't supported
+        frontend = pkgs.fetchzip {
+          url = "https://github.com/foldu/aiswitch/releases/download/frontend%2Fv0.1.0/frontend.zip";
+          sha256 = "sha256-TczvtZluX8tRTKpaTjbESbalcCjjVBa1k5WfB+WHzZU=";
+        };
+
         craneLib = (crane.mkLib pkgs).overrideToolchain (
           p:
           p.rust-bin.stable.latest.default.override {
@@ -50,6 +56,13 @@
               (lib.fileset.maybeMissing ./frontend/dist)
             ];
           };
+          preBuildPhases = [ "copyFrontend" ];
+
+          copyFrontend = ''
+            if ! [[ $pname =~ -deps$ ]]; then
+                cp -r ${frontend}/* frontend/dist
+            fi
+          '';
 
           strictDeps = true;
 
@@ -62,7 +75,10 @@
           inherit aiswitch;
         };
 
-        packages.default = aiswitch;
+        packages = {
+          default = aiswitch;
+          inherit aiswitch;
+        };
       }
     );
 }
