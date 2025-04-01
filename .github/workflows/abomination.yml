@@ -1,24 +1,24 @@
 name: "Embarrassing"
 on:
-    push:
-        tags:
-            - "*"
+  push:
+    tags:
+      - "*"
 jobs:
-    build-frontend:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-        defaults:
-            run:
-                working-directory: frontend
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions/checkout@v4
-            - uses: oven-sh/setup-bun@v2
+  build-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
 
-            - run: bun install
-            - run: bun run build
-            - run: zip -r frontend.zip dist/
-            - uses: softprops/action-gh-release@v2
-              with:
-                  files: frontend/frontend.zip
+      - run: bun install
+      - run: bun run build
+      - run: zip -r frontend.zip dist/
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: frontend/frontend.zip
